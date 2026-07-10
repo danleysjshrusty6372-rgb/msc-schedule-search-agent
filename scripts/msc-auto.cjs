@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * MSC Shipping Schedule Query 鈥?Auto Agent
+ * MSC Shipping Schedule Query — Auto Agent
  * 
  * Usage:
  *   node msc-auto.cjs "SHANGHAI" "ROTTERDAM"
- *   node msc-auto.cjs "涓婃捣" "姹夊牎"
+ *   node msc-auto.cjs "上海" "汉堡"
  *   node msc-auto.cjs "SHANGHAI" "HAMBURG" --batch 3
  *
  * Features:
@@ -19,7 +19,7 @@ const { execSync, spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-// 鈹€鈹€鈹€ Config 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// ─── Config ────────────────────────────────────────────
 const CONFIG = {
   // xbrowser executable
   xb: path.join(process.env.USERPROFILE, '.qclaw', 'skills', 'xbrowser', 'scripts', 'xb.cjs'),
@@ -27,7 +27,7 @@ const CONFIG = {
   portsFile: path.join(__dirname, 'msc-ports.json'),
   // MSC URL
   mscUrl: 'https://www.msccargo.cn/zh-cn/schedule',
-  // Wait timings (ms) 鈥?tuned for reliability
+  // Wait timings (ms) — tuned for reliability
   waits: {
     afterCookie: 1000,
     autocomplete: 2000,
@@ -38,7 +38,7 @@ const CONFIG = {
   browser: 'default',
 };
 
-// 鈹€鈹€鈹€ XB Runner 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// ─── XB Runner ─────────────────────────────────────────
 function xb(args, timeoutSec = 30) {
   const cmd = ['node', CONFIG.xb, 'run', '--browser', CONFIG.browser];
   if (timeoutSec > 10) cmd.push('--timeout', String(timeoutSec * 1000));
@@ -53,7 +53,7 @@ function xb(args, timeoutSec = 30) {
   }
 }
 
-// 鈹€鈹€鈹€ Port Resolution 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// ─── Port Resolution ──────────────────────────────────
 const ports = JSON.parse(fs.readFileSync(CONFIG.portsFile, 'utf8')).ports;
 
 function resolvePort(input) {
@@ -72,13 +72,13 @@ function resolvePort(input) {
   return prefixMatch || null;
 }
 
-// 鈹€鈹€鈹€ Cookie Handler 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// ─── Cookie Handler ────────────────────────────────────
 function acceptCookies() {
-  const r = xb(['eval', `(function(){var b=document.querySelectorAll('button');for(var i=0;i<b.length;i++){if(b[i].textContent.trim()==='鎺ュ彈鎵€鏈?Cookie'){b[i].click();return true}}return false})()`], 10);
+  const r = xb(['eval', `(function(){var b=document.querySelectorAll('button');for(var i=0;i<b.length;i++){if(b[i].textContent.trim()==='接受所有 Cookie'){b[i].click();return true}}return false})()`], 10);
   return r?.data?.result?.result === true;
 }
 
-// 鈹€鈹€鈹€ Single Route Query 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// ─── Single Route Query ────────────────────────────────
 function queryRoute(fromMSC, toMSC, tabIndex = null) {
   const wt = CONFIG.waits;
 
@@ -106,7 +106,7 @@ function queryRoute(fromMSC, toMSC, tabIndex = null) {
   }
   if (!fromRef) return { error: 'From field not found in snapshot' };
 
-  // Step 3: Fill From 鈥?wait 鈥?click dropdown
+  // Step 3: Fill From — wait — click dropdown
   const b1 = xb(['batch',
     `snapshot -i -c`,
     `fill @${fromRef} '${fromMSC}'`,
@@ -170,7 +170,7 @@ function queryRoute(fromMSC, toMSC, tabIndex = null) {
   try {
     const refs3 = snap3.data.result.refs;
     for (const [k, v] of Object.entries(refs3)) {
-      if (v.role === 'button' && v.name.includes('鎼滅储鑸规湡琛?)) searchRef = k;
+      if (v.role === 'button' && v.name.includes('搜索船期表')) searchRef = k;
     }
   } catch (e) { /* skip */ }
   if (!searchRef) return { error: 'Search button not found (form may be incomplete)' };
@@ -185,9 +185,9 @@ function queryRoute(fromMSC, toMSC, tabIndex = null) {
   return extractResults();
 }
 
-// 鈹€鈹€鈹€ Extract Results 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// ─── Extract Results ───────────────────────────────────
 function extractResults() {
-  const r = xb(['eval', `JSON.stringify(Array.from(document.querySelectorAll('[class*=point-to-point-details__result]')).map((r,i)=>{var h=r.querySelectorAll('.data-heading');return {n:i+1,dep:h[0]?h[0].textContent.trim():'',arr:h[1]?h[1].textContent.trim():'',type:r.textContent.includes('鐩?)?'Direct':(r.textContent.includes('涓?)?'Transship':'N/A')}}))`], 10);
+  const r = xb(['eval', `JSON.stringify(Array.from(document.querySelectorAll('[class*=point-to-point-details__result]')).map((r,i)=>{var h=r.querySelectorAll('.data-heading');return {n:i+1,dep:h[0]?h[0].textContent.trim():'',arr:h[1]?h[1].textContent.trim():'',type:r.textContent.includes('直')?'Direct':(r.textContent.includes('中')?'Transship':'N/A')}}))`], 10);
   try {
     const data = JSON.parse(r?.data?.result?.result || '[]');
     return { count: data.length, data };
@@ -196,70 +196,70 @@ function extractResults() {
   }
 }
 
-// 鈹€鈹€鈹€ Screenshot 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// ─── Screenshot ────────────────────────────────────────
 function takeScreenshot(name) {
   const r = xb(['screenshot', '--full'], 15);
   const path_ = r?.data?.result?.path || null;
   return path_;
 }
 
-// 鈹€鈹€鈹€ Format Output 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// ─── Format Output ──────────────────────────────────────
 function formatResults(from, to, result) {
   const lines = [];
-  lines.push('馃殺 **MSC 鑸规湡鏌ヨ缁撴灉**');
-  lines.push(`馃搷 **鍑哄彂娓細** ${from}`);
-  lines.push(`馃搷 **鐩殑娓細** ${to}`);
+  lines.push('🚢 **MSC 船期查询结果**');
+  lines.push(`📍 **出发港：** ${from}`);
+  lines.push(`📍 **目的港：** ${to}`);
   lines.push('');
 
   if (!result || result.count === 0) {
-    lines.push('鉂?璇ヨ矾绾挎殏鏃?MSC 鐩磋揪鎴栦腑杞湇鍔°€?);
+    lines.push('❌ 该路线暂无 MSC 直达或中转服务。');
     return lines.join('\n');
   }
 
   const direct = result.data.filter(d => d.type === 'Direct');
   const trans = result.data.filter(d => d.type === 'Transship');
 
-  lines.push('鈹佲攣鈹?**鐩磋揪鑸嚎** 鈹佲攣鈹?);
+  lines.push('━━━ **直达航线** ━━━');
   if (direct.length > 0) {
-    lines.push(`鍏?**${direct.length}** 鏉＄洿杈綻);
+    lines.push(`共 **${direct.length}** 条直达`);
     lines.push('');
-    lines.push('| # | 绂绘腐 | 鍒版腐 | 绫诲瀷 |');
+    lines.push('| # | 离港 | 到港 | 类型 |');
     lines.push('|---|------|------|:----:|');
-    direct.forEach(d => lines.push(`| ${d.n} | ${d.dep} | ${d.arr} | 鉁呯洿杈?|`));
+    direct.forEach(d => lines.push(`| ${d.n} | ${d.dep} | ${d.arr} | ✅直达 |`));
   } else {
-    lines.push('鉂?鏃犵洿杈炬湇鍔?);
+    lines.push('❌ 无直达服务');
   }
 
   if (trans.length > 0) {
     lines.push('');
-    lines.push('鈹佲攣鈹?**涓浆鑸嚎** 鈹佲攣鈹?);
-    lines.push(`鍏?**${trans.length}** 鏉′腑杞琡);
+    lines.push('━━━ **中转航线** ━━━');
+    lines.push(`共 **${trans.length}** 条中转`);
     lines.push('');
-    lines.push('| # | 绂绘腐 | 鍒版腐 | 绫诲瀷 |');
+    lines.push('| # | 离港 | 到港 | 类型 |');
     lines.push('|---|------|------|:----:|');
-    trans.forEach(d => lines.push(`| ${d.n} | ${d.dep} | ${d.arr} | 馃攧涓浆 |`));
+    trans.forEach(d => lines.push(`| ${d.n} | ${d.dep} | ${d.arr} | 🔄中转 |`));
   }
 
   lines.push('');
-  if (direct.length > 0) lines.push(`鈿?**鏈€蹇洿杈撅細** ${direct[0].dep} 鈫?${direct[0].arr}`);
-  if (trans.length > 0) lines.push(`鈿?**鏈€蹇惈涓浆锛?* ${trans[0].dep} 鈫?${trans[0].arr}`);
+  if (direct.length > 0) lines.push(`⚡ **最快直达：** ${direct[0].dep} → ${direct[0].arr}`);
+  if (trans.length > 0) lines.push(`⚡ **最快含中转：** ${trans[0].dep} → ${trans[0].arr}`);
 
   return lines.join('\n');
 }
 
-// 鈹€鈹€鈹€ Main 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+// ─── Main ──────────────────────────────────────────────
 async function main() {
   const args = process.argv.slice(2);
   if (args.length < 2) {
     console.log(`
-馃殺 MSC Shipping Schedule Query 鈥?Auto Agent
+🚢 MSC Shipping Schedule Query — Auto Agent
 Usage:
   node msc-auto.cjs <from_port> <to_port> [options]
 
 Examples:
   node msc-auto.cjs "SHANGHAI" "ROTTERDAM"
-  node msc-auto.cjs "涓婃捣" "姹夊牎"
-  node msc-auto.cjs "闈掑矝" "娲涙潐鐭?
+  node msc-auto.cjs "上海" "汉堡"
+  node msc-auto.cjs "青岛" "洛杉矶"
 
 Options:
   --screenshot    Take full-page screenshot after query
@@ -279,20 +279,20 @@ Options:
   const fromPort = resolvePort(fromRaw);
   const toPort = resolvePort(toRaw);
 
-  if (!fromPort) { console.error(`鉂?鏃犳硶瑙ｆ瀽娓彛: ${fromRaw}`); process.exit(1); }
-  if (!toPort) { console.error(`鉂?鏃犳硶瑙ｆ瀽娓彛: ${toRaw}`); process.exit(1); }
+  if (!fromPort) { console.error(`❌ 无法解析港口: ${fromRaw}`); process.exit(1); }
+  if (!toPort) { console.error(`❌ 无法解析港口: ${toRaw}`); process.exit(1); }
 
-  console.log(`馃攳 鏌ヨ MSC 鑸规湡锛?{fromPort.mscName} 鈫?${toPort.mscName}`);
-  console.log(`   (${fromPort.code} 鈫?${toPort.code})`);
+  console.log(`🔍 查询 MSC 船期：${fromPort.mscName} → ${toPort.mscName}`);
+  console.log(`   (${fromPort.code} → ${toPort.code})`);
 
   // Open page if needed
   if (doOpen) {
-    console.log('馃搫 鎵撳紑 MSC 椤甸潰...');
+    console.log('📄 打开 MSC 页面...');
     xb(['open', CONFIG.mscUrl], 15);
   }
 
   // Run query
-  console.log('鈴?鏌ヨ涓?..');
+  console.log('⏳ 查询中...');
   const result = queryRoute(fromPort.mscName, toPort.mscName, tabIdx);
 
   const output = formatResults(fromPort.mscName, toPort.mscName, result);
@@ -300,18 +300,18 @@ Options:
 
   // Screenshot
   if (doScreenshot) {
-    console.log('馃摳 鎴浘...');
+    console.log('📸 截图...');
     const shot = takeScreenshot();
-    if (shot) console.log(`馃搸 鎴浘宸蹭繚瀛? ${shot}`);
+    if (shot) console.log(`📎 截图已保存: ${shot}`);
   }
 
   // Save result to workspace
   const ws = process.env.USERPROFILE + '/.qclaw/workspace';
   const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const fname = `msc-${fromPort.code}-${toPort.code}-${ts}.md`;
-  const report = `# MSC 鑸规湡鏌ヨ\n\n${output}\n\n---\n*鏌ヨ鏃堕棿: ${new Date().toISOString()}*\n`;
+  const report = `# MSC 船期查询\n\n${output}\n\n---\n*查询时间: ${new Date().toISOString()}*\n`;
   fs.writeFileSync(path.join(ws, fname), report, 'utf8');
-  console.log(`馃捑 宸蹭繚瀛? ${fname}`);
+  console.log(`💾 已保存: ${fname}`);
 }
 
-main().catch(e => console.error('鉂?閿欒:', e.message));
+main().catch(e => console.error('❌ 错误:', e.message));
