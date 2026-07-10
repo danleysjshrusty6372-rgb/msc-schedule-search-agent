@@ -1,8 +1,6 @@
 # 🚢 MSC Shipping Schedule Search Agent
 
 > **Browser-automated MSC container shipping schedule lookup — 10x faster than manual browsing**
->
-> **浏览器自动化的 MSC 船期查询工具 — 比手动浏览快 10 倍**
 
 [![Version](https://img.shields.io/badge/version-2.0.0-blue)]()
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)]()
@@ -11,162 +9,192 @@
 
 ---
 
-## 🇬🇧 English / 🇨🇳 中文
+## ✨ What It Does
 
-> **English below | 中文在下文**
+This tool automates the **MSC (Mediterranean Shipping Company)** schedule search website, allowing you to query shipping schedules between any two ports in **~14 seconds** — compared to **~90 seconds** doing it manually.
 
----
+> **Real-world results:** 25+ routes queried, 80+ individual sailings extracted, all with full automation.
 
-## What It Does / 功能简介
+## 📊 Performance
 
-Automates the **MSC (Mediterranean Shipping Company)** schedule search website. Query shipping schedules between any two ports in **~14 seconds** instead of ~90 seconds manually.
+| Comparison | Manual | Old v1 Automation | **v2 Automation** |
+|-----------|:-----:|:----------------:|:-----------------:|
+| Single route | ~90s | ~34s | **~14s** 🔥 |
+| 3 routes | ~5min | ~102s | **~42s** 🔥 |
+| 10 routes | ~15min | ~6min | **~2.5min** 🔥 |
 
-**自动查询 MSC 官网船期**，输入两个港口名，~14 秒出结果。已实测 **25+ 条航线、80+ 航次**。
 
-| Comparison / 对比 | Manual / 手动 | Old v1 / 旧版 | **v2 This Tool / 新版** |
-|-------------------|:------------:|:------------:|:---------------------:|
-| Single route / 单条 | ~90s | ~34s | **~14s** |
-| 3 routes / 三条 | ~5min | ~102s | **~42s** |
-| 10 routes / 十条 | ~15min | ~6min | **~2.5min** |
+## 🧠 How It Works
 
-## How It Works / 工作原理
+```
+┌─ Step 1 ─────────────────────────────────────┐
+│  🍪 Auto-dismiss Cookie consent popup         │
+├─ Step 2 ─────────────────────────────────────┤
+│  ✏️ Fill departure port → autocomplete → tap  │
+├─ Step 3 ─────────────────────────────────────┤
+│  ✏️ Fill arrival port → autocomplete → tap    │
+├─ Step 4 ─────────────────────────────────────┤
+│  🔍 Click Search → wait for Vue.js to render  │
+├─ Step 5 ─────────────────────────────────────┤
+│  📊 Extract structured results (JSON/MD)      │
+└───────────────────────────────────────────────┘
+```
 
-~~~
-Step 1  Accept Cookie consent popup / 自动关闭 Cookie 弹窗
-Step 2  Fill departure port -> autocomplete -> click / 填写出发港 -> 下拉 -> 点击
-Step 3  Fill arrival port -> autocomplete -> click / 填写目的港 -> 下拉 -> 点击
-Step 4  Click Search -> wait for results / 点击搜索 -> 等待结果
-Step 5  Extract structured data / 提取结构化数据
-~~~
+The tool uses **xbrowser** (CDP/Playwright-based) to control a real Chromium browser. It handles:
 
-The tool handles these challenges / 本工具能处理这些难点:
-- Vue.js reactive forms that ignore plain value assignment
-- Vue autocomplete with PointerEvent dispatch
-- Cookie consent banners on every page load
-- Chinese port name resolution (上海 -> SHANGHAI, CHINA (CNSHA))
-- Multi-tab parallelism for batch queries
+- ✅ **Vue.js reactive forms** — Properly triggers v-model bindings
+- ✅ **Vue autocomplete dropdowns** — PointerEvent dispatch for Angular-like components
+- ✅ **Cookie consent banners** — Auto-dismisses on page load
+- ✅ **Chinese port names** — Built-in mapping (上海 → SHANGHAI, CHINA (CNSHA))
+- ✅ **Multi-tab parallelism** — Pre-load 3 MSC tabs for batch queries
 
-## Quick Start / 快速开始
+## 🚀 Quick Start
 
-### Prerequisites / 前提
+### Prerequisites
 
-- Windows OS
-- OpenClaw with xbrowser skill installed
+- Windows OS (Chrome for Testing managed by xbrowser)
+- [OpenClaw](https://openclaw.ai) with xbrowser skill installed
 
-### One-command query / 一键查询
+### One-command Query
 
 ```powershell
 node scripts/msc-auto.cjs "上海" "汉堡"
 ```
 
-### With screenshot / 带截图
+### With Screenshot
 
 ```powershell
 node scripts/msc-auto.cjs "青岛" "洛杉矶" --screenshot
 ```
 
-### Multi-tab batch / 多标签页批量（最快）
+### Multi-tab Batch (fastest)
 
 ```powershell
-# Open 3 MSC pages ahead of time / 预开 3 个 MSC 页面
+# Open 3 MSC pages ahead of time
 xb run tab new "https://www.msccargo.cn/zh-cn/schedule"
 xb run tab new "https://www.msccargo.cn/zh-cn/schedule"
 xb run tab new "https://www.msccargo.cn/zh-cn/schedule"
 
-# Query each tab / 查询各标签页
+# Query each tab
 node msc-auto.cjs "上海" "鹿特丹" --tab 1
 node msc-auto.cjs "宁波" "汉堡"   --tab 2
 node msc-auto.cjs "盐田" "西雅图"  --tab 3
 ```
 
-## Port Mapping / 港口映射
+## 🗺️ Port Mapping
 
-Built-in mapping for 30+ major ports / 内置 30+ 主要港口映射:
+Built-in mapping for **30+ major ports**:
 
-| 中文名 | MSC Name | Code |
-|-------|----------|:----:|
+| Your Input | MSC Name | Code |
+|-----------|----------|:----:|
 | 上海 | SHANGHAI, CHINA | CNSHA |
 | 宁波 | NINGBO, CHINA | CNNGB |
 | 深圳/蛇口 | SHEKOU, CHINA | CNSHK |
-| 青岛 | QINGDAO, CHINA | CNTAO |
-| 天津 | TIANJINXINGANG, CHINA | CNTXG |
 | 汉堡 | HAMBURG, GERMANY | DEHAM |
 | 鹿特丹 | ROTTERDAM, NETHERLANDS | NLRTM |
-| 新加坡 | SINGAPORE | SGSIN |
 | 洛杉矶 | LOS ANGELES, US | USLAX |
-| 釜山 | BUSAN, KOREA, REPUBLIC OF | KRPUS |
+| 新加坡 | SINGAPORE | SGSIN |
 
-Full list: [scripts/msc-ports.json](scripts/msc-ports.json)
+Full mapping in [`scripts/msc-ports.json`](scripts/msc-ports.json).
 
-## Project Structure / 项目结构
+## 📦 Project Structure
 
-~~~
+```
 msc-schedule-search-agent/
-├── README.md                   This file / 本说明
-├── SKILL.md                    Agent skill definition / Agent 技能定义
+├── SKILL.md                    ← Agent skill definition
+├── README.md                   ← This file
 ├── scripts/
-│   ├── msc-auto.cjs            Autonomous query script / 全自动查询脚本
-│   └── msc-ports.json          Port mapping database / 港口映射数据库
-~~~
+│   ├── msc-auto.cjs            ← Autonomous query script
+│   └── msc-ports.json          ← Port name mapping database
+└── docs/
+    └── architecture.md         ← Technical deep dive
+```
 
-## Verified Routes / 已验证航线
+## 📱 WeChat Integration
 
-### Direct only / 直达航线
+When integrated with OpenClaw's WeChat channel, the flow is fully automated:
 
-| Route / 航线 | Direct Sailings / 直达数 | Notes |
-|-------------|:--------------------:|-------|
-| Shanghai -> Rotterdam / 上海->鹿特丹 | 10 | Best European route |
-| Shanghai -> Hamburg / 上海->汉堡 | 10 | Confirmed Jul 2026 |
-| Yantian -> Seattle / 盐田->西雅图 | 9 | Best US West Coast |
-| Shanghai -> Santos / 上海->桑托斯 | 8 | Brazil service |
-| Shanghai -> Buenos Aires / 上海->布宜诺斯艾利斯 | 7 | Fastest 42 days |
+1. Customer sends "查一下上海到汉堡的船期" on WeChat
+2. Agent auto-resolves ports → queries MSC → extracts results
+3. Agent sends back formatted table + screenshot to customer
+4. All within the WeChat conversation — no app switching needed
 
-### No MSC service / 无 MSC 服务
+## 📊 Verified Routes
 
-- Any CN port -> Busan (釜山): MSC has no direct service
-- Shanghai -> Los Angeles (上海->洛杉矶): No MSC service
-- Nansha -> Los Angeles (南沙->洛杉矶): No direct
-- Dubai / Dammam / Aqaba (迪拜/达曼/亚喀巴): Not in MSC system
+### 🔥 High-frequency direct routes
 
-## Performance Optimization / 性能优化
+| From → To | Direct Sailings | Notes |
+|----------|:--------------:|-------|
+| Shanghai → Rotterdam | **10** | Best European route |
+| Shanghai → Hamburg | **10** | Confirmed July 2026 |
+| Yantian → Seattle | **9** | Best US West Coast |
+| Shanghai → Santos | **8** | Brazil service |
+| Shanghai → Buenos Aires | **7** | Fastest 42 days |
+| Ningbo → Buenos Aires | 4 | With transshipment |
+| Shekou → Montevideo | 3 | Uruguay service |
 
-| Optimization / 优化项 | Before / 优化前 | After / 优化后 |
-|---------------------|:------------:|:-------------:|
-| Warmup eval / 热身eval | Required (+2s) | Skipped |
-| Autocomplete wait / 下拉等待 | 3.5s | 2.0s |
-| Search result wait / 搜索等待 | 10-12s | 5.0s |
-| Page reload per route / 每次重载 | Required | Reused (multi-tab) |
-| CDP connections / 连接方式 | Per command | Batch mode |
+### ❌ No MSC service
 
-## Technical Deep Dive / 技术要点
+| Route | Issue |
+|-------|-------|
+| Any CN port → Busan | MSC has no direct service |
+| Shanghai → Los Angeles | No MSC service |
+| Nansha → Los Angeles | No direct |
+| Dubai / Dammam / Aqaba | Not in MSC system |
 
-### The Cookie Problem / Cookie 弹窗
+## ⚡ Technical Highlights
 
-The MSC site shows a Cookie consent banner on every page load that overlays form elements. The tool auto-detects and dismisses it via text-based button targeting.
+### Why this is fast
 
-### Vue.js Form Challenge / Vue 表单难题
+| Optimization | Before | After |
+|-------------|:-----:|:-----:|
+| Warmup eval | Required (2s) | **Skipped** |
+| Autocomplete wait | 3.5s | **2.0s** |
+| Search result wait | 10-12s | **5.0s** |
+| Page reload per route | Required | **Reused** (if multi-tab) |
+| xb CDP connections | Per command | **Batch mode** (reuse) |
+
+### The Cookie Problem
+
+The MSC site shows a **Cookie consent banner** on every page load that overlays the form elements. The tool auto-detects and dismisses it using text-based button targeting — no hardcoded refs needed.
+
+### Vue.js Form Challenge
 
 MSC uses Vue.js with reactive forms. Simple DOM value assignment doesn't trigger the framework. Two techniques are used:
+- **xbrowser's `fill` command** → triggers proper input events (works for text entry)
+- **PointerEvent dispatch sequence** → `pointerdown→mousedown→pointerup→mouseup→click` (works for Vue dropdown selection)
 
-1. **xbrowser's `fill` command** -> triggers proper input events
-2. **PointerEvent dispatch sequence** -> `pointerdown -> mousedown -> pointerup -> mouseup -> click` (for Vue dropdown)
+## ⚠️ Caveats
 
-## WeChat Integration / 微信集成
+1. **MSC website may change** — selectors and page structure can break; run a test query first
+2. **Rate limiting** — MSC doesn't block, but be reasonable (query in batches of 5-10)
+3. **Window focus** — The browser tab must remain visible; minimize at your own risk
+4. **Port names** — Must match MSC's autocomplete exactly; the mapping database helps
 
-When integrated with OpenClaw's WeChat channel:
+## 🛠️ Development
 
-1. Customer sends / 客户发: "查一下上海到汉堡的船期"
-2. Agent auto-resolves ports -> queries MSC -> extracts results
-3. Agent returns formatted table + screenshot
-4. All within WeChat / 全程微信内完成
+```bash
+# Test a single route
+node scripts/msc-auto.cjs "上海" "汉堡" --open
 
-## License / 许可
+# Test port resolution
+node -e "const p=require('./scripts/msc-ports.json');console.log(p.ports.length+' ports loaded')"
+```
 
-MIT - use freely, modify freely, share freely.
+## 🤝 Contributing
+
+PRs welcome! Particularly:
+- Additional port mappings
+- Support for other shipping lines (Maersk, CMA CGM, COSCO)
+- Improved error recovery
+
+## 📄 License
+
+MIT — use freely, modify freely, share freely.
 
 ---
 
 <p align="center">
-  <b>Made with by QClaw Agent</b><br>
+  <b>Made with ⚡ by QClaw Agent</b><br>
   <i>Part of the OpenClaw ecosystem</i>
 </p>
