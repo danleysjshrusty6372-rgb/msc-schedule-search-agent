@@ -2,18 +2,39 @@
 
 > **Browser-automated MSC container shipping schedule lookup — 10x faster than manual browsing**
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)]()
+[![Version](https://img.shields.io/badge/version-3.0.0-blue)]()
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)]()
 [![Automation](https://img.shields.io/badge/automation-CDP%20%7C%20Playwright-brightgreen)]()
-[![Made for](https://img.shields.io/badge/made%20for-OpenClaw%20Agent-purple)]()
+
+---
+
+## 🆕 Hermes Agent 版本（推荐）
+
+本仓库已适配 **Hermes Agent**，原 xbrowser 依赖重写为纯 CDP（Chrome DevTools Protocol）脚本，详见 `SKILL.md`。
+
+**核心文件：**
+- `SKILL.md` — 完整指南（港口表 60+、排错速查、冷门偏港训练结果、换机器部署说明）
+- `scripts/msc_query_cdp.py` — 核心查询脚本（真实鼠标点击 Alpine.js 下拉，支持 `--reuse` 提速）
+- `scripts/setup.py` — 换机器一键部署/自检（`check`/`install`/`test`）
+- `scripts/msc_train.py` — 批量训练脚本
+- `references/msc-ports.json` — 60+ 港口映射
+
+**快速开始（Hermes）：**
+```bash
+python scripts/setup.py install   # 装 websocket-client + 启动常驻 Chrome
+python scripts/setup.py check     # 检查就绪
+python scripts/msc_query_cdp.py "上海" "科佩尔"   # 查询
+```
+
+> 新机器仅需 2 个外部依赖：`websocket-client` (pip) + Google Chrome。
 
 ---
 
 ## ✨ What It Does
 
-This tool automates the **MSC (Mediterranean Shipping Company)** schedule search website, allowing you to query shipping schedules between any two ports in **~14 seconds** — compared to **~90 seconds** doing it manually.
+This tool automates the **MSC (Mediterranean Shipping Company)** schedule search website, allowing you to query shipping schedules between any two ports in **~6-14 seconds** — compared to **~90 seconds** doing it manually.
 
-> **Real-world results:** 25+ routes queried, 80+ individual sailings extracted, all with full automation.
+> **Real-world results:** 40+ routes queried, 150+ individual sailings extracted, all with full automation.
 
 ## 📊 Performance
 
